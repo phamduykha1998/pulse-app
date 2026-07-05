@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>160 ngày</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#100F0E;--pop:#1A1917;--edge:#2A2825;--edge2:#221F1C;--ink:#EFEBE1;--soft:#8B857A;--red:#E5484D;--done:#6E6A60;--lh:44px;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+    display:flex;justify-content:center;padding:22px 12px 50px;min-height:100vh;-webkit-font-smoothing:antialiased;}
+  .app{width:100%;max-width:440px;}
+  .hide{display:none!important;}
+
+  .milestones{display:flex;flex-wrap:wrap;gap:6px 7px;padding-bottom:16px;margin-bottom:18px;border-bottom:1px solid var(--edge2);}
+  .ms{font-size:12px;font-weight:600;color:var(--soft);}
+  .ms.passed{color:var(--done);text-decoration:line-through;text-decoration-color:var(--red);}
+  .ms.current{color:#fff;background:var(--red);padding:1px 8px;border-radius:4px;font-weight:800;}
+
+  h1{font-size:24px;font-weight:800;letter-spacing:-.4px;}
+  .sub{font-size:12.5px;color:var(--soft);margin:3px 0 16px;}
+
+  .meal-row{position:relative;height:var(--lh);margin:2px 0;}
+  .mlabel{position:absolute;left:0;top:0;height:var(--lh);display:flex;align-items:center;font-size:14px;font-weight:700;color:var(--red);}
+  .picker{position:absolute;left:50px;right:0;top:0;height:var(--lh);overflow:hidden;
+    scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y;cursor:pointer;background:transparent;}
+  .picker::-webkit-scrollbar{display:none;}
+  .picker.open{height:calc(var(--lh)*3);top:50%;transform:translateY(-50%);overflow-y:auto;
+    scroll-snap-type:y mandatory;z-index:20;background:var(--pop);border:1px solid var(--edge2);border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.6);}
+  .pad{height:var(--lh);}
+  .opt{height:var(--lh);scroll-snap-align:center;display:flex;align-items:center;padding:0 12px;
+    font-size:14.5px;font-weight:500;line-height:1.2;transition:opacity .15s;}
+  .opt b{font-weight:800;color:#fff;}
+  .picker:not(.open) .pad{display:none;}
+  .picker:not(.open) .opt{display:none;}
+  .picker:not(.open) .opt.sel{display:flex;padding:0 2px;}
+  .picker.open .opt{opacity:.28;}
+  .picker.open .opt.center{opacity:1;}
+  .opt.struck .otxt{text-decoration:line-through;text-decoration-color:var(--red);color:var(--done);}
+  .opt.struck b{color:var(--done);}
+
+  .label{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin:20px 0 4px;}
+  .line{padding:10px 2px;cursor:pointer;font-size:15.5px;font-weight:500;border-bottom:1px solid var(--edge2);line-height:1.3;}
+  .line:last-child{border-bottom:none;}
+  .line .dgr{color:var(--red);font-weight:700;}
+  .line.done{text-decoration:line-through;text-decoration-color:var(--red);color:var(--done);}
+  .line.done .dgr{color:var(--done);}
+
+  .steps-row{display:flex;align-items:center;gap:10px;padding:10px 2px;font-size:15.5px;font-weight:500;}
+  .steps-row input{width:90px;background:var(--pop);border:1px solid var(--edge);border-radius:6px;color:var(--ink);
+    font-family:inherit;font-size:15px;padding:7px 9px;text-align:right;}
+  .steps-row .unit{color:var(--soft);font-size:13px;}
+  .btn-s{background:transparent;border:1px solid var(--edge);color:var(--soft);font-family:inherit;font-size:13px;
+    font-weight:600;padding:7px 12px;border-radius:6px;cursor:pointer;}
+  .btn-s:active{transform:scale(.97);}
+  .saved{color:var(--done);text-decoration:line-through;text-decoration-color:var(--red);}
+
+  .meas{margin-top:20px;border:1px solid var(--edge);border-radius:9px;padding:14px;}
+  .meas .mt{font-size:13px;font-weight:800;color:var(--red);letter-spacing:1px;margin-bottom:8px;}
+  .meas .mr{display:flex;align-items:center;gap:8px;font-size:14.5px;margin:7px 0;}
+  .meas .mr span:first-child{min-width:88px;color:var(--soft);font-size:13px;}
+  .meas input{width:80px;background:var(--pop);border:1px solid var(--edge);border-radius:6px;color:var(--ink);
+    font-family:inherit;font-size:14.5px;padding:6px 8px;text-align:right;}
+  .meas .est{font-weight:700;}
+  .meas .note{font-size:11px;color:var(--soft);margin-top:6px;}
+
+  .cheat{margin-top:28px;width:100%;background:transparent;border:1.5px dashed var(--edge);color:var(--soft);
+    font-family:inherit;font-size:14px;font-weight:600;padding:13px;border-radius:8px;cursor:pointer;letter-spacing:.5px;}
+  .cheat:active{transform:scale(.99);}
+  .cheat[disabled]{opacity:.35;cursor:default;}
+  .app.rest .dim{opacity:.35;pointer-events:none;}
+  .rest-flag{display:none;margin-top:12px;font-size:13px;font-weight:700;color:var(--red);}
+  .app.rest .rest-flag{display:block;}
+
+  .foot{display:flex;gap:14px;justify-content:center;margin-top:34px;}
+  .foot button,.foot label{background:none;border:none;color:#4A463F;font-family:inherit;font-size:12px;cursor:pointer;text-decoration:underline;}
+  #impFile{display:none;}
+
+  .start-wrap{text-align:center;padding:80px 0;}
+  .start-wrap h1{margin-bottom:8px;}
+  .start-wrap p{color:var(--soft);font-size:14px;margin-bottom:30px;}
+  .big{background:var(--red);color:#fff;border:none;font-family:inherit;font-size:16px;font-weight:800;
+    padding:15px 40px;border-radius:9px;cursor:pointer;letter-spacing:.5px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div id="startScreen" class="start-wrap hide">
+    <h1>160 ngày</h1>
+    <p>92 → 72. Bắt đầu bằng 14 ngày khởi động — chỉ 4 việc.</p>
+    <button class="big" id="btnStart">Bắt đầu</button>
+  </div>
+
+  <div id="main" class="hide">
+    <div class="milestones" id="milestones"></div>
+    <div class="dim">
+      <h1 id="dayTitle">Hôm nay</h1>
+      <div class="sub" id="daySub"></div>
+      <div id="meals"></div>
+      <div class="label" id="woLabel"></div>
+      <div id="workout"></div>
+      <div class="label">Mỗi ngày</div>
+      <div id="daily"></div>
+      <div class="steps-row">
+        <span>Bước: <b id="stepTarget"></b></span>
+        <input type="number" id="stepInput" inputmode="numeric" placeholder="0">
+        <button class="btn-s" id="stepSave">Lưu</button>
+      </div>
+      <div class="meas hide" id="measCard">
+        <div class="mt" id="measTitle"></div>
+        <div class="mr"><span>Hệ thống</span><span class="est" id="measEst"></span></div>
+        <div class="mr"><span>Cân nặng</span><input type="number" step="0.1" id="mW" inputmode="decimal"> kg</div>
+        <div class="mr"><span>Vòng bụng</span><input type="number" step="0.5" id="mB" inputmode="decimal"> cm <span style="color:var(--soft);font-size:11px">(tùy chọn)</span></div>
+        <div class="mr"><span></span><button class="btn-s" id="measSave">Lưu số đo</button></div>
+        <div class="note">Số hệ thống là ước tính theo kế hoạch, không phải cam kết.</div>
+      </div>
+    </div>
+    <button class="cheat" id="cheatBtn">Chít hôm nay</button>
+    <div class="rest-flag">Đã ghi ngày chít — mai tiếp tục đúng chỗ.</div>
+    <div class="foot">
+      <button id="btnExp">Sao lưu</button>
+      <label for="impFile">Nhập lại</label><input type="file" id="impFile" accept=".json">
+    </div>
+  </div>
+
+  <div id="doneScreen" class="start-wrap hide">
+    <h1>Hoàn thành 160 ngày</h1>
+    <p>Giờ là giai đoạn giữ: tăng ăn từ từ, 10.000 bước/ngày, gym 3–4 buổi/tuần, cân 2 lần/tuần.</p>
+  </div>
+</div>
+
+<script>
+/* ================= DATA ================= */
+const POOL = {
+sang:[
+'<b>3 trứng</b> + yến mạch + chuối',
+'<b>2 trứng</b> ốp ít dầu + bánh mì đen + táo',
+'yến mạch + <b>sữa chua</b> không đường + chuối',
+'<b>trứng</b> chần + khoai lang',
+'<b>trứng</b> cuộn rau củ + 1 lát bánh mì đen',
+'<b>sữa chua Hy Lạp</b> + yến mạch + kiwi',
+'<b>2 trứng</b> luộc + bắp luộc (1 trái nhỏ)',
+'cháo yến mạch + <b>trứng</b> + rau thơm',
+'bánh mì đen + <b>trứng</b> ốp + dưa leo',
+'<b>trứng</b> hấp + khoai lang + cam',
+'yến mạch nấu <b>sữa hạt</b> không đường + chuối',
+'<b>đậu hũ non</b> + <b>trứng</b> + rau',
+'sinh tố chuối + <b>sữa chua</b> không đường + yến mạch',
+'<b>2 trứng</b> luộc + xôi gạo lứt (ít) + dưa leo'
+],
+trua:[
+'<b>ức gà</b> áp chảo + cơm + rau luộc',
+'<b>cá</b> (rô phi/basa) + cơm + canh rau',
+'<b>bò nạc</b> xào bông cải + cơm',
+'<b>tôm</b> hấp + cơm + rau muống',
+'<b>gà</b> luộc xé + cơm gạo lứt + rau',
+'<b>cá nục</b> kho lạt + cơm + canh cải',
+'<b>bò nạc</b> lúc lắc + cơm + salad',
+'<b>mực</b> hấp + cơm + cải luộc',
+'<b>đùi gà bỏ da</b> nướng + cơm + dưa leo cà chua',
+'<b>cá diêu hồng</b> hấp + cơm + rau',
+'<b>tôm</b> rim ít dầu + cơm + canh bí',
+'<b>heo nạc thăn</b> luộc + cơm + rau muống',
+'<b>đậu hũ</b> sốt cà + <b>trứng</b> + cơm + rau',
+'<b>gà</b> nấu nấm + cơm + rau'
+],
+toi:[
+{t:'<b>cá</b> hấp + salad',c:0},
+{t:'<b>ức gà</b> + khoai lang nhỏ + rau',c:1},
+{t:'<b>đậu hũ</b> + <b>tôm</b> + cải xanh',c:0},
+{t:'<b>bò nạc</b> + rau trộn',c:0},
+{t:'<b>cá</b> áp chảo + bông cải/măng tây',c:0},
+{t:'<b>gà</b> xé + gỏi rau củ (ít đường)',c:0},
+{t:'<b>trứng</b> + <b>đậu hũ</b> hấp + rau luộc',c:0},
+{t:'<b>tôm</b> nướng + salad dưa leo cà chua',c:0},
+{t:'<b>mực</b> hấp gừng + cải thìa',c:0},
+{t:'<b>cá</b> kho lạt + rau + khoai lang nhỏ',c:1},
+{t:'<b>bò</b> xào nấm + rau xanh',c:0},
+{t:'canh <b>gà</b> rau củ (nhiều rau)',c:0},
+{t:'<b>cá ngừ</b> + salad <b>trứng</b>',c:0},
+{t:'<b>đậu hũ</b> nướng + rau củ nướng',c:0}
+],
+phu:[
+'táo (1 quả)','bưởi (vài múi)','<b>sữa chua</b> không đường','<b>hạnh nhân</b> 1 nắm nhỏ',
+'cam (1 quả)','kiwi (1–2 quả)','ổi (1 quả)','<b>sữa chua</b> + hạt chia'
+]};
+
+const GYM = [
+[{t:'Kéo xô trước ngực — 3×12',d:0},{t:'Chèo cáp ngồi — 3×12',d:0},{t:'Đẩy vai — 3×10, tạ nhẹ',d:1},{t:'Nâng tạ ngang — 3×12, tạ nhẹ',d:1},{t:'Plank — 3×30s',d:0}],
+[{t:'Chèo tạ 1 tay — 3×12/bên, lưng phẳng',d:1},{t:'Kéo dây ngang (band pull-apart) — 3×15',d:0},{t:'Đẩy vai tạ đơn — 3×10',d:1},{t:'Nâng trước xen kẽ — 3×12, tạ nhẹ',d:1},{t:'Superman — 3×12',d:0}]
+];
+const EST = {10:'90–91',20:'88–90',30:'86.5–88.5',40:'84–87',50:'82–85',60:'81–84',70:'80–83',80:'79–82',90:'78–81',100:'77–80',110:'76.5–79',120:'75.5–78',130:'74.5–77',140:'74–76',150:'73–75',160:'72 ±1'};
+
+function stepBase(n){
+  if(n<=10)return 6000; if(n<=20)return 8000; if(n<=40)return 10000;
+  if(n<=70)return 12000; if(n<=90)return 13000; if(n<=120)return 14000; return 15000;
+}
+function cardioMin(n){ if(n<=20)return 20; if(n<=50)return 25; if(n<=100)return 40; return 45; }
+function phase(n){ return n<=50?1:(n<=100?2:3); }
+
+/* ================= STATE ================= */
+const KEY='plan160';
+let canLS=true;
+function loadS(){try{return JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){canLS=false;return null;}}
+let S = loadS() || {start:null,cheats:[],logs:{},extra:{},gymDebt:0,lastFin:null,meas:{},kitchen:false};
+const save=()=>{try{if(canLS)localStorage.setItem(KEY,JSON.stringify(S));}catch(e){canLS=false;}};
+
+const pad=x=>String(x).padStart(2,'0');
+const fmt=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c);};
+const addD=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return fmt(d);};
+const today=()=>fmt(new Date());
+const diff=(a,b)=>Math.round((parse(b)-parse(a))/86400000);
+const monday=s=>{const d=parse(s);const k=(d.getDay()+6)%7;d.setDate(d.getDate()-k);return fmt(d);};
+const dow=s=>parse(s).getDay(); // 0=CN
+
+function effN(date){
+  if(!S.start)return 0;
+  let n=diff(S.start,date)+1;
+  n-=S.cheats.filter(c=>c<date).length;
+  return n;
+}
+function dayType(date){
+  const w=dow(date);
+  if(w===1||w===3||w===5)return 'gym';
+  if(w===2||w===6)return 'cardio';
+  return 'rest';
+}
+function log(date){ if(!S.logs[date])S.logs[date]={struck:{},steps:null,meals:{}}; return S.logs[date]; }
+
+/* ---------- finalize các ngày đã qua (chạy ngầm) ---------- */
+function finalize(){
+  if(!S.start)return;
+  let d=S.lastFin?addD(S.lastFin,1):S.start;
+  const t=today();
+  while(d<t){
+    if(!S.cheats.includes(d)){
+      const raw=effN(d);
+      if(raw>=1&&raw<=174){
+        if(dow(d)===1)S.gymDebt=0; // reset thứ 2
+        const L=S.logs[d]||{struck:{},steps:null};
+        const pn=raw-14;
+        const base=raw<=14?6000:stepBase(pn);
+        const extra=Math.min(S.extra[d]||0,Math.round(base*0.3));
+        const target=base+extra;
+        const got=L.steps||0;
+        if(got<target){
+          const short=target-got, per=Math.round(short/4);
+          for(let i=1;i<=4;i++){const f=addD(d,i);S.extra[f]=(S.extra[f]||0)+per;}
+        }
+        if(pn>=11){
+          const ty=dayType(d);
+          const woDone=L.struck&&L.struck.workoutAll;
+          if(ty==='gym'&&!woDone)S.gymDebt++;
+          if(ty==='rest'&&S.gymDebt>0&&woDone)S.gymDebt--;
+        }
+      }
+    }
+    S.lastFin=d;
+    d=addD(d,1);
+  }
+  save();
+}
+
+/* ================= RENDER ================= */
+const $=id=>document.getElementById(id);
+let openState=null;
+const closeOpen=()=>{if(openState){openState();openState=null;}};
+document.addEventListener('click',()=>closeOpen());
+
+function render(){
+  const t=today();
+  if(!S.start){$('startScreen').classList.remove('hide');return;}
+  finalize();
+  const raw=effN(t);
+  if(raw>174){$('doneScreen').classList.remove('hide');$('main').classList.add('hide');return;}
+  $('main').classList.remove('hide');
+
+  const ph0=raw<=14, n=raw-14; // n = ngày trong plan 160
+  const isCheat=S.cheats.includes(t);
+  document.querySelector('.app').classList.toggle('rest',isCheat);
+
+  // cột mốc
+  const mw=$('milestones');mw.innerHTML='';
+  const kd=document.createElement('span');kd.className='ms'+(ph0?' current':' passed');kd.textContent='KĐ';mw.appendChild(kd);
+  const cur=ph0?0:Math.min(160,Math.ceil(n/10)*10);
+  for(let m=10;m<=160;m+=10){
+    const e=document.createElement('span');e.className='ms';e.textContent=m;
+    if(!ph0&&m<cur)e.classList.add('passed');else if(!ph0&&m===cur)e.classList.add('current');
+    mw.appendChild(e);
+  }
+
+  const L=log(t);
+  $('daySub').textContent = ph0 ? 'Khởi động — chỉ vài việc, làm đủ là thắng'
+    : (phase(n)===3&&dayType(t)!=='gym' ? 'Giai đoạn 3 — hôm nay giảm cơm trưa còn 1/2 chén' : '');
+
+  // ----- bữa ăn (ẩn trong khởi động) -----
+  const mWrap=$('meals');mWrap.innerHTML='';
+  if(!ph0){
+    const ph=phase(n);
+    const mealsDef=[
+      {key:'sang',name:'Sáng',opts:POOL.sang.map(x=>({t:x}))},
+      {key:'trua',name:'Trưa',opts:POOL.trua.map(x=>({t:x}))},
+      {key:'toi', name:'Tối', opts:POOL.toi.filter(o=>ph===1||o.c===0)},
+      {key:'phu', name:'Phụ', opts:POOL.phu.map(x=>({t:x}))}
+    ];
+    mealsDef.forEach(meal=>{
+      const defIdx=n%meal.opts.length;
+      if(!L.meals[meal.key])L.meals[meal.key]={idx:defIdx,struck:false};
+      const st=L.meals[meal.key];
+      const row=document.createElement('div');row.className='meal-row';
+      row.innerHTML='<div class="mlabel">'+meal.name+':</div>';
+      const pick=document.createElement('div');pick.className='picker';
+      pick.appendChild(Object.assign(document.createElement('div'),{className:'pad'}));
+      const els=[];
+      meal.opts.forEach(o=>{const e=document.createElement('div');e.className='opt';
+        e.innerHTML='<span class="otxt">'+o.t+'</span>';pick.appendChild(e);els.push(e);});
+      pick.appendChild(Object.assign(document.createElement('div'),{className:'pad'}));
+      row.appendChild(pick);mWrap.appendChild(row);
+      const LH=44;let mode='closed';
+      const mark=()=>{els.forEach((e,k)=>{e.classList.toggle('sel',k===st.idx);e.classList.toggle('struck',st.struck&&k===st.idx);});};
+      const center=()=>{const i=Math.round(pick.scrollTop/LH);els.forEach((e,k)=>e.classList.toggle('center',k===i));};
+      mark();
+      const collapse=strike=>{
+        st.idx=Math.max(0,Math.min(els.length-1,Math.round(pick.scrollTop/LH)));
+        st.struck=strike;mode='closed';
+        pick.classList.remove('open');els.forEach(e=>e.classList.remove('center'));
+        mark();save();
+      };
+      const openP=()=>{closeOpen();mode='open';st.struck=false;
+        pick.classList.add('open');void pick.offsetHeight;
+        pick.scrollTop=st.idx*LH;center();openState=()=>collapse(false);};
+      pick.addEventListener('scroll',()=>{if(mode==='open')requestAnimationFrame(center);});
+      pick.addEventListener('click',e=>{e.stopPropagation();mode==='open'?collapse(true):openP();});
+    });
+  }
+
+  // ----- vận động -----
+  let items=[],woTitle='Vận động';
+  if(ph0){
+    items=[{t:'Giãn cơ 10 phút',d:0},{t:'Tập kỹ thuật squat + chống đẩy (tay không, chậm)',d:0}];
+  }else if(n<=10){
+    items=[{t:'Giãn cơ 10 phút',d:0}];
+  }else{
+    const ty=dayType(t);
+    const showGym = ty==='gym' || (ty==='rest'&&S.gymDebt>0);
+    if(showGym){
+      woTitle='Tập — Lưng & Vai';
+      items=GYM[Math.floor(n/2)%2].map(x=>({...x}));
+    }else if(ty==='cardio'&&n>=21){
+      woTitle='Cardio';
+      const mn=cardioMin(n);
+      items=[{t:'Đạp xe / elliptical / đi bộ nhanh — '+mn+' phút',d:0},{t:'Giãn cơ 10 phút',d:0}];
+      if(n>50)items.splice(1,0,{t:'(Nhảy dây/chạy bộ khi thấy khớp ổn)',d:0});
+    }else{
+      woTitle='Nghỉ';
+      items=[{t:'Đi bộ nhẹ',d:0},{t:'Giãn cơ 10 phút',d:0}];
+    }
+  }
+  $('woLabel').textContent=woTitle;
+  const wWrap=$('workout');wWrap.innerHTML='';
+  const woEls=[];
+  items.forEach((it,i)=>{
+    const e=document.createElement('div');e.className='line';
+    e.innerHTML=it.d?'<span class="dgr">'+it.t+'</span>':it.t;
+    if(L.struck['w'+i])e.classList.add('done');
+    e.addEventListener('click',ev=>{ev.stopPropagation();e.classList.toggle('done');
+      L.struck['w'+i]=e.classList.contains('done');
+      L.struck.workoutAll=woEls.every(x=>x.classList.contains('done'));save();});
+    wWrap.appendChild(e);woEls.push(e);
+  });
+  L.struck.workoutAll=woEls.length>0&&woEls.every(x=>x.classList.contains('done'));
+
+  // ----- mỗi ngày -----
+  let daily;
+  if(ph0){
+    daily=[['d1','Ngủ trước 23:00'],['d2','Không nước ngọt'],['d3','Uống 3 lít nước'],['d5','Quay 1 clip TikTok']];
+    if(!S.kitchen)daily.unshift(['dk','Dọn bếp — vứt/cất đồ ngọt, snack, mì gói']);
+  }else{
+    const wk=Math.ceil(n/7);
+    const R=['không nước ngọt','+ rau mọi bữa','+ protein mọi bữa chính','+ không đồ chiên','+ không bánh kẹo'];
+    const rule = wk>=5 ? 'Không ngọt · rau & protein mọi bữa · không chiên · không bánh kẹo · không bia'
+                       : R.slice(0,wk).join(' ');
+    daily=[['d1','Uống 3 lít nước'],['dr','Quy tắc tuần này: '+rule],
+           ['d2','Học / đọc sách 30 phút'],['d3','Ngủ 7–8 tiếng (trước 23:00)'],['d5','Quay 1 clip TikTok']];
+  }
+  const dWrap=$('daily');dWrap.innerHTML='';
+  daily.forEach(([k,txt])=>{
+    const e=document.createElement('div');e.className='line';e.textContent=txt;
+    if(L.struck[k])e.classList.add('done');
+    e.addEventListener('click',ev=>{ev.stopPropagation();e.classList.toggle('done');
+      L.struck[k]=e.classList.contains('done');
+      if(k==='dk'&&L.struck[k])S.kitchen=true;
+      save();});
+    dWrap.appendChild(e);
+  });
+
+  // ----- bước -----
+  const base=ph0?6000:stepBase(n), extra=Math.min(S.extra[t]||0,Math.round(base*0.3));
+  $('stepTarget').textContent=(base+extra).toLocaleString('vi');
+  const si=$('stepInput');
+  si.value='';si.classList.remove('saved');
+  if(L.steps!=null){si.value=L.steps;si.classList.add('saved');}
+  $('stepSave').onclick=e=>{e.stopPropagation();const v=parseInt(si.value)||0;L.steps=v;si.classList.add('saved');save();};
+  si.oninput=()=>si.classList.remove('saved');
+
+  // ----- bảng đo mốc 10 -----
+  const card=$('measCard');
+  if(!ph0&&n%10===0&&EST[n]){
+    card.classList.remove('hide');
+    $('measTitle').textContent='Mốc '+n+' — bảng đo';
+    $('measEst').textContent='~'+EST[n]+' kg (ước tính)';
+    const M=S.meas[n]||{};
+    $('mW').value=M.w||'';$('mB').value=M.b||'';
+    $('measSave').onclick=e=>{e.stopPropagation();
+      S.meas[n]={w:parseFloat($('mW').value)||null,b:parseFloat($('mB').value)||null};save();
+      $('measSave').textContent='Đã lưu';setTimeout(()=>$('measSave').textContent='Lưu số đo',1200);};
+  }else card.classList.add('hide');
+
+  // ----- chít -----
+  const usedThisWeek=S.cheats.some(c=>monday(c)===monday(t));
+  const cb=$('cheatBtn');
+  cb.disabled=usedThisWeek&&!isCheat;
+  cb.textContent=isCheat?'Bỏ chít hôm nay':(usedThisWeek?'Tuần này đã chít':'Chít hôm nay');
+  cb.onclick=e=>{e.stopPropagation();
+    if(isCheat)S.cheats=S.cheats.filter(c=>c!==t);
+    else if(!usedThisWeek)S.cheats.push(t);
+    save();render();};
+}
+
+/* ---------- start / backup ---------- */
+$('btnStart').onclick=()=>{S.start=today();S.lastFin=addD(today(),-1);save();$('startScreen').classList.add('hide');render();};
+$('btnExp').onclick=()=>{
+  const blob=new Blob([JSON.stringify(S)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='sao-luu-160.json';a.click();
+};
+$('impFile').onchange=ev=>{
+  const f=ev.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{S=JSON.parse(r.result);save();['startScreen','doneScreen'].forEach(x=>$(x).classList.add('hide'));render();}catch(e){alert('File không đúng định dạng');}};
+  r.readAsText(f);
+};
+
+render();
+</script>
+</body>
+</html>
